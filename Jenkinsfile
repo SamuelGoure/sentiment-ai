@@ -14,7 +14,9 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                echo "Branche : ${env.BRANCH_NAME}"
+                // BRANCH_NAME n'est peuplé que par les jobs Multibranch Pipeline ;
+                // pour un job Pipeline simple, c'est GIT_BRANCH qu'il faut utiliser
+                echo "Branche : ${env.GIT_BRANCH}"
                 echo "Commit  : ${env.GIT_COMMIT}"
                 sh 'git log --oneline -5'
             }
@@ -53,7 +55,9 @@ pipeline {
         }
 
         stage('Push') {
-            when { branch 'main' }
+            // Job Pipeline simple (pas Multibranch) : on teste GIT_BRANCH,
+            // qui peut valoir "main" ou "origin/main" selon le contexte
+            when { expression { env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main' } }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'github-token',
