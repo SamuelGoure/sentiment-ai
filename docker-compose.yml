@@ -3,9 +3,8 @@ version: '3.9'
 services:
   sentiment-ai:
     build: .
-    container_name: sentiment-staging
     ports:
-      - "8080:8000"  # hôte:conteneur
+      - "${HOST_PORT:-8080}:8000"  # hôte:conteneur (HOST_PORT permet d'éviter les collisions entre projets compose)
     environment:
       - ENV=development
     networks:
