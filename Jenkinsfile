@@ -37,8 +37,12 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                // --volumes-from jenkins partage le workspace avec ce conteneur éphémère :
+                // sans ça, coverage.xml serait écrit dans /app du conteneur et perdu au --rm
                 sh """
                     docker run --rm \
+                        --volumes-from jenkins \
+                        -w \$WORKSPACE \
                         ${IMAGE_NAME}:${IMAGE_TAG} \
                         pytest tests/ -v \
                         --cov=src \
