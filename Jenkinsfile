@@ -1,4 +1,4 @@
-// Jenkinsfile - Pipeline CI/CD SentimentAI - 10 stages
+// Jenkinsfile - Pipeline CI/CD SentimentAI - 11 stages
 pipeline {
     agent any
 
@@ -167,6 +167,30 @@ pipeline {
             when { expression { env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main' } }
             steps {
                 sh 'docker exec sentiment-staging curl -sf http://localhost:8000/health || exit 1'
+            }
+        }
+
+        stage('Smoke Test') {
+            when { expression { env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main' } }
+            steps {
+                // Verifier que /metrics expose bien nos metriques personnalisees
+                sh '''
+                    docker exec sentiment-staging curl -sf http://localhost:8000/health
+                    docker exec sentiment-staging curl -s http://localhost:8000/metrics \
+                        | grep -q "sentiment_predictions_total" \
+                        || (echo "ERREUR: metrique sentiment_predictions_total absente" && exit 1)
+                    echo "Metriques Prometheus OK"
+                '''
+                // Verifier Prometheus et Grafana s'ils tournent (non bloquant)
+                sh '''
+                    docker exec prometheus curl -sf \
+                        "http://localhost:9090/api/v1/query?query=up" \
+                        > /dev/null 2>&1 && echo "Prometheus OK" \
+                        || echo "Prometheus non disponible (ignoré)"
+                    docker exec grafana curl -sf http://localhost:3000/api/health \
+                        > /dev/null 2>&1 && echo "Grafana OK" \
+                        || echo "Grafana non disponible (ignoré)"
+                '''
             }
         }
     }

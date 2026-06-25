@@ -12,3 +12,13 @@ output "network_name" {
   description = "Nom du reseau Docker cree"
   value       = docker_network.cicd.name
 }
+
+output "prometheus_url" {
+  description = "URL Prometheus"
+  value       = "http://localhost:9090"
+}
+
+output "grafana_url" {
+  description = "URL Grafana (admin/admin)"
+  value       = "http://localhost:3000"
+}

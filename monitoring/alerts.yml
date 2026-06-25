@@ -1,0 +1,35 @@
+groups:
+  - name: sentiment-ai
+    rules:
+      - alert: HighLatency
+        expr: >
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 0.5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latence P95 > 500ms"
+          description: "Le percentile 95 de la latence dépasse 500ms depuis 1 minute."
+
+      - alert: HighErrorRate
+        expr: >
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m])) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taux d'erreur HTTP > 5%"
+          description: "Plus de 5% des requêtes retournent une erreur 5xx."
+
+      - alert: LowConfidenceScore
+        expr: sentiment_confidence_score < 0.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Score de confiance faible"
+          description: "Le score de confiance des prédictions est inférieur à 0.5 depuis 2 minutes."
