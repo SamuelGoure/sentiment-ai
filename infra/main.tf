@@ -7,9 +7,8 @@ terraform {
   }
 }
 
-# macOS avec Docker Desktop
 provider "docker" {
-  host = "unix:///Users/samuelgoure/.docker/run/docker.sock"
+  host = "unix:///var/run/docker.sock"
 }
 
 # Reseau Docker partage Jenkins / SonarQube / SentimentAI
