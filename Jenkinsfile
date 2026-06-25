@@ -166,7 +166,7 @@ pipeline {
         stage('Deploy Staging') {
             when { expression { env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main' } }
             steps {
-                sh 'curl -f http://localhost:8001/health || exit 1'
+                sh 'docker exec sentiment-staging curl -sf http://localhost:8000/health || exit 1'
             }
         }
     }
